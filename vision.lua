@@ -7,10 +7,10 @@ function Vision:initialize(segments)
     for _, segment in pairs(self.segments) do table.insert(self.points, segment.a) end
 
     self.origin = { x = 0, y = 0 }
+    self.viewdistance = 300
     self.raylength = tools.distance({ x = 0, y = 0 },{ x = love.graphics:getWidth(), y = love.graphics:getHeight() })
     self.rays = {}
-    self.polygon = {}
-    self.pp = {}
+    self.mesh = {}
 end
 
 function Vision:setOrigin(x, y) 
@@ -25,22 +25,19 @@ end
 function Vision:update()
     self.angles = {}
     self.rays = {}
-    self.polygon = {}
+    self.mesh = {}
 
     local angles = self:calcAngles()
     local rays = self:calcRays(angles)
     self.rays = self:calcIntersects(rays)
 
-    table.insert(self.polygon, {self.origin.x, self.origin.y})
+    table.insert(self.mesh, {self.origin.x, self.origin.y})
     for _, ray in pairs(self.rays) do
         if ray.intersect then
-            table.insert(self.polygon, {ray.intersect.x, ray.intersect.y})
-            -- table.insert(self.polygon, ray.intersect.x)
-            -- table.insert(self.polygon, ray.intersect.y)
-            table.insert(self.pp, ray.intersect)
+            table.insert(self.mesh, {ray.intersect.x, ray.intersect.y})
         end
     end
-    table.insert(self.polygon, self.polygon[2])
+    table.insert(self.mesh, self.mesh[2])
 
 end
 
@@ -88,4 +85,3 @@ function Vision:calcIntersects(rays)
 end
 
 return Vision
-
