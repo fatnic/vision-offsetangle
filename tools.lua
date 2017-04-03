@@ -19,6 +19,19 @@ function tools.normalise(v)
     return { x = v.x / len, y = v.y / len }
 end
 
+function tools.ternary(cond, t, f)
+    if cond then return t else return f end
+end
+
+function tools.isAngleBetween(angle, min, max)
+    local rad = math.pi * 2
+    local angle = (rad + (angle % rad)) % rad
+    local min = (rad + min) % rad
+    local max = (rad + max) % rad
+    if (min < max) then return min <= angle and angle <= max end
+    return min <= angle or angle <= max
+end
+
 function tools.segmentIntersect(a, b, c, d)
 
     local L1 = {X1=a.x,Y1=a.y,X2=b.x,Y2=b.y}
