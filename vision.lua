@@ -8,6 +8,9 @@ function Vision:initialize(segments)
 
     self.origin = { x = 0, y = 0 }
     self.viewdistance = 300
+    self.heading = 0
+    self.fov = 65
+
     self.raylength = tools.distance({ x = 0, y = 0 },{ x = love.graphics:getWidth(), y = love.graphics:getHeight() })
     self.rays = {}
     self.mesh = {}
