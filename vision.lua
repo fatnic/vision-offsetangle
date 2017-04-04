@@ -47,6 +47,28 @@ function Vision:getOrigin()
     return { x = self.origin.x, y = self.origin.y }
 end
 
+function Vision:setHeading(angle)
+    self.heading = angle
+    self:calcFoV()
+end
+
+function Vision:setViewDistance(dist)
+    self.viewdistance = dist
+end
+
+function Vision:getViewDistance()
+    return self.viewdistance
+end
+
+function Vision:setFoV(degrees)
+    self.fov = degrees
+    self:calcFoV()
+end
+
+function Vision:getFoV()
+    return self.fov
+end
+
 function Vision:calcFoV()
     self.minFoV = self.heading - tools.normaliseRadian(math.rad(self.fov / 2))
     self.maxFoV = self.heading + tools.normaliseRadian(math.rad(self.fov / 2))

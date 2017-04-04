@@ -40,14 +40,24 @@ function love.load()
     walls[1].visible = false
 
     vision = Vision(walls)
+
+    bloom = love.graphics.newShader('bloom.frag')
+    bloom:send("size", { width, height })
+    bloom:send("quality", 10)
 end
 
 function love.mousemoved(x, y)
-    vision:setOrigin(x, y)
+    local o = vision:getOrigin()
+    local angle = math.atan2(y - o.y, x - o.x)
+    vision:setHeading(angle)
 end
 
 function love.mousepressed(x, y, button)
     if button == 1 then
+        vision:setOrigin(x, y)
+    end
+
+    if button == 2 then
         target.x = x
         target.y = y
     end
@@ -59,28 +69,12 @@ function love.update(dt)
 end
 
 function love.draw()
-    -- love.graphics.setLineWidth(1)
-    -- love.graphics.setColor(0, 0, 255, 180)
-    -- for _, wall in pairs(walls) do
-    --     love.graphics.rectangle('line', wall.x, wall.y, wall.width, wall.height)
-    -- end
 
     local o = vision:getOrigin()
     love.graphics.setColor(0, 255, 0, 100)
     love.graphics.circle('fill', o.x, o.y, 4)
 
-    -- for i, ray in ipairs(vision.rays) do 
-
-    --     love.graphics.setLineWidth(1)
-    --     love.graphics.setColor(255, 255, 255, 50)
-    --     love.graphics.line(ray.a.x, ray.a.y, ray.b.x, ray.b.y)
-
-    --     if ray.intersect then 
-    --         love.graphics.setColor(5, 255, 5, 250)
-    --         love.graphics.circle('fill', ray.intersect.x, ray.intersect.y, 4) 
-    --     end
-    -- end
-    local color = tools.ternary(vision:inVision(target), {255,0,0,50}, {255,255,255,50})
+    local color = tools.ternary(vision:inVision(target), {255,0,0,55}, {255,255,255,55})
     love.graphics.setColor(color)
     love.graphics.stencil(visionStencil, 'replace', 1)
     love.graphics.setStencilTest('equal', 1)
@@ -89,9 +83,11 @@ function love.draw()
     love.graphics.setStencilTest()
     --
     love.graphics.setColor(0, 0, 255)
+    -- love.graphics.setShader(effect)
     for _, wall in pairs(walls) do
         if wall.visible then love.graphics.rectangle('fill', wall.x, wall.y, wall.width, wall.height) end
     end
+    -- love.graphics.setShader()
 
     love.graphics.setColor(255, 0, 0)
     love.graphics.circle('fill', target.x, target.y, 5)
