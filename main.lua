@@ -21,12 +21,10 @@ local wall_list = {
 }
 
 local walls = {}
-local player = { x = 50, y = 50 }
-
 local target = { x = 100, y = 100 }
 
 function visionStencil()
-    love.graphics.arc('fill', vision.origin.x, vision.origin.y, vision.viewdistance, vision.maxFoV, vision.minFoV, 20)
+    love.graphics.arc('fill', vision.origin.x, vision.origin.y, vision.viewdistance, vision.maxFoV, vision.minFoV, 50)
 end
 
 function love.load()
@@ -40,16 +38,37 @@ function love.load()
     walls[1].visible = false
 
     vision = Vision(walls)
+    vision:setOrigin(width/2, 70)
 
     bloom = love.graphics.newShader('bloom.frag')
     bloom:send("size", { width, height })
-    bloom:send("quality", 10)
+    bloom:send("quality", 5)
 end
 
 function love.mousemoved(x, y)
     local o = vision:getOrigin()
     local angle = math.atan2(y - o.y, x - o.x)
     vision:setHeading(angle)
+    vision:setViewDistance(tools.distance(o, { x = x, y = y }))
+end
+
+function love.keypressed(key)
+    if key == 'up' then 
+        local d = vision:getViewDistance()
+        vision:setViewDistance(d + 10)
+    end
+    if key == 'down' then 
+        local d = vision:getViewDistance()
+        vision:setViewDistance(d - 10)
+    end
+    if key == 'left' then 
+        local f = vision:getFoV()
+        vision:setFoV(f - 2)
+    end
+    if key == 'right' then 
+        local f = vision:getFoV()
+        vision:setFoV(f + 2)
+    end
 end
 
 function love.mousepressed(x, y, button)
@@ -69,7 +88,6 @@ function love.update(dt)
 end
 
 function love.draw()
-
     local o = vision:getOrigin()
     love.graphics.setColor(0, 255, 0, 100)
     love.graphics.circle('fill', o.x, o.y, 4)
@@ -81,13 +99,13 @@ function love.draw()
     local mesh = love.graphics.newMesh(vision.mesh, 'fan')
     love.graphics.draw(mesh)
     love.graphics.setStencilTest()
-    --
+
     love.graphics.setColor(0, 0, 255)
-    -- love.graphics.setShader(effect)
+    love.graphics.setShader(effect)
     for _, wall in pairs(walls) do
         if wall.visible then love.graphics.rectangle('fill', wall.x, wall.y, wall.width, wall.height) end
     end
-    -- love.graphics.setShader()
+    love.graphics.setShader()
 
     love.graphics.setColor(255, 0, 0)
     love.graphics.circle('fill', target.x, target.y, 5)
