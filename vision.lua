@@ -13,7 +13,7 @@ function Vision:initialize(walls)
     self.origin = { x = 0, y = 0 }
     self.viewdistance = 300
     self.heading = 0
-    self.fov = 64
+    self.fov = 64 
     self:calcFoV()
 
     self.raylength = tools.distance({ x = 0, y = 0 },{ x = love.graphics:getWidth(), y = love.graphics:getHeight() })

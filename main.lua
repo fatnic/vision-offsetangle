@@ -40,9 +40,14 @@ function love.load()
     vision = Vision(walls)
     vision:setOrigin(width/2, 70)
 
-    bloom = love.graphics.newShader('bloom.frag')
-    bloom:send("size", { width, height })
-    bloom:send("quality", 5)
+    floor = love.graphics.newImage('floor.jpg')
+    floor:setWrap('repeat', 'repeat')
+    quad = love.graphics.newQuad(0, 0, width, height, floor:getWidth(), floor:getHeight())
+
+    cscale = 1
+    bcanvas = love.graphics.newCanvas(width/cscale, height/cscale)
+    
+    love.graphics.setBackgroundColor(150, 150, 150)
 end
 
 function love.mousemoved(x, y)
@@ -85,27 +90,43 @@ end
 function love.update(dt)
     love.window.setTitle(love.timer.getFPS() .. ' fps')
     vision:update()
+
+    -- draw
 end
 
 function love.draw()
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.draw(floor, quad, 0, 0)
+
     local o = vision:getOrigin()
     love.graphics.setColor(0, 255, 0, 100)
     love.graphics.circle('fill', o.x, o.y, 4)
 
-    local color = tools.ternary(vision:inVision(target), {255,0,0,55}, {255,255,255,55})
+    love.graphics.push()
+    love.graphics.scale(1/cscale, 1/cscale)
+    love.graphics.setCanvas(bcanvas)
+    love.graphics.clear()
+    local color = tools.ternary(vision:inVision(target), {255,0,0,25}, {255,255,255,55})
     love.graphics.setColor(color)
     love.graphics.stencil(visionStencil, 'replace', 1)
     love.graphics.setStencilTest('equal', 1)
     local mesh = love.graphics.newMesh(vision.mesh, 'fan')
     love.graphics.draw(mesh)
     love.graphics.setStencilTest()
+    love.graphics.setCanvas()
+    love.graphics.pop()
 
+    love.graphics.setBlendMode('alpha', 'premultiplied')
+    -- love.graphics.setShader(bloom)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.draw(bcanvas, 0, 0, 0, cscale, cscale)
+    -- love.graphics.setShader()
+
+    love.graphics.setBlendMode('alpha')
     love.graphics.setColor(0, 0, 255)
-    love.graphics.setShader(effect)
     for _, wall in pairs(walls) do
         if wall.visible then love.graphics.rectangle('fill', wall.x, wall.y, wall.width, wall.height) end
     end
-    love.graphics.setShader()
 
     love.graphics.setColor(255, 0, 0)
     love.graphics.circle('fill', target.x, target.y, 5)
