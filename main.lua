@@ -24,7 +24,13 @@ local walls = {}
 local target = { x = 100, y = 100 }
 
 function visionStencil()
-    love.graphics.arc('fill', vision.origin.x, vision.origin.y, vision.viewdistance, vision.maxFoV, vision.minFoV, 50)
+end
+
+function lightStencil()
+    local segments = vision.viewdistance / 10
+    local mesh = love.graphics.newMesh(vision.mesh, 'fan')
+    love.graphics.draw(mesh)
+    love.graphics.arc('fill', vision.origin.x, vision.origin.y, vision.viewdistance, vision.maxFoV, vision.minFoV, segments)
 end
 
 function love.load()
@@ -90,46 +96,31 @@ end
 function love.update(dt)
     love.window.setTitle(love.timer.getFPS() .. ' fps')
     vision:update()
-
-    -- draw
 end
 
 function love.draw()
     love.graphics.setColor(255, 255, 255)
     love.graphics.draw(floor, quad, 0, 0)
 
-    local o = vision:getOrigin()
-    love.graphics.setColor(0, 255, 0, 100)
-    love.graphics.circle('fill', o.x, o.y, 4)
-
-    love.graphics.push()
-    love.graphics.scale(1/cscale, 1/cscale)
-    love.graphics.setCanvas(bcanvas)
-    love.graphics.clear()
-    local color = tools.ternary(vision:inVision(target), {255,0,0,25}, {255,255,255,55})
-    love.graphics.setColor(color)
-    love.graphics.stencil(visionStencil, 'replace', 1)
-    love.graphics.setStencilTest('equal', 1)
-    local mesh = love.graphics.newMesh(vision.mesh, 'fan')
-    love.graphics.draw(mesh)
-    love.graphics.setStencilTest()
-    love.graphics.setCanvas()
-    love.graphics.pop()
-
-    love.graphics.setBlendMode('alpha', 'premultiplied')
-    -- love.graphics.setShader(bloom)
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(bcanvas, 0, 0, 0, cscale, cscale)
-    -- love.graphics.setShader()
 
-    love.graphics.setBlendMode('alpha')
     love.graphics.setColor(0, 0, 255)
     for _, wall in pairs(walls) do
         if wall.visible then love.graphics.rectangle('fill', wall.x, wall.y, wall.width, wall.height) end
     end
 
+    local o = vision:getOrigin()
+    love.graphics.setColor(0, 255, 0)
+    love.graphics.circle('fill', o.x, o.y, 8)
+
     love.graphics.setColor(255, 0, 0)
     love.graphics.circle('fill', target.x, target.y, 5)
+
+    love.graphics.stencil(lightStencil, 'increment', 1)
+    love.graphics.setStencilTest('less', 2)
+    love.graphics.setColor(0,0,0,160)
+    love.graphics.rectangle('fill', 0, 0, width, height)
+    love.graphics.setStencilTest()
 end
 
 
